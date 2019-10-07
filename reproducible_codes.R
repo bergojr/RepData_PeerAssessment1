@@ -30,6 +30,25 @@ plot(avg_steps_interval$Group.1,avg_steps_interval$x, type = "l")
 avg_steps_interval$Group.1[which.max(sum_steps_interval$x)]
 avg_steps_interval$x[which.max(sum_steps_interval$x)]
 
+#Calculando a quantidade de NA
+
+nrow_dataset <- nrow(activity)
+missing_values_dataset <- sum(!complete_activity)
+(missing_values_dataset/nrow_dataset)*100
+
+#with(avg_steps_interval, x[which(Group.1==25)])
+# 
+# filled_activity <- activity %>%
+#   transform(activity[!complete_activity,"steps"] <- with(avg_steps_interval,x[which(Group.1==activity$interval)]))
+
+filled_activity <- activity
+
+for ( i in 1:nrow_dataset){
+  if (is.na(filled_activity$steps[i])){
+    filled_activity$steps[i] <- with(avg_steps_interval,x[which(Group.1==filled_activity$interval[i])])
+  }
+}
+
 
 fileURL <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip"
 fileName <- "FNEI_data.zip"
