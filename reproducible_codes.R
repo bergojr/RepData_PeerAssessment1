@@ -23,6 +23,7 @@ activity$date <- as.Date(activity$date, "%Y-%m-%d")
 complete_activity <- complete.cases(activity)
 act_no_NA <- activity[complete_activity,]
 
+#------------------- Questão 1
 sum_steps_day <- aggregate(act_no_NA$steps, list(act_no_NA$date), sum)
 mean_steps_day <- aggregate(act_no_NA$steps, list(act_no_NA$date), mean)
 median_steps_day <- aggregate(act_no_NA$steps, list(act_no_NA$date), median)
@@ -34,14 +35,36 @@ hist(sum_steps_day$x, breaks = 20, xlab = "Number of Steps per Day",
 abline(v=total_median_steps_day,col="blue")
 text(total_median_steps_day+350,9,"Median", col="blue", adj=c(0,0.5))
 
+# -------------------- Fim da Questão 1
+
+#------------------- Questão 2
+
+# Agregating data acording 5 minutes interval
 avg_steps_interval <- aggregate(act_no_NA$steps, list(factor(act_no_NA$interval)), median)
-avg_steps_interval <- remove.factors(avg_steps_interval)
+avg_steps_interval <- remove.factors(avg_steps_interval)  # Factor removed to plot data
+
+
+# Search interval with high mean value
+
+max_interval <- avg_steps_interval$Group.1[which.max(avg_steps_interval$x)]
+max_mean_estep <- avg_steps_interval$x[which.max(avg_steps_interval$x)]
+print(paste("The maximun mean step value occurs at interval: ", max_interval,
+           "at value of:", max_mean_estep))
+
+# Subseting data nearest to the maximum value
+
+interval_x <- as.character(seq(as.numeric(max_interval)-100,as.numeric(max_interval)+100,5))
+selec_interval <- filter(avg_steps_interval,Group.1 %in% interval_x)
+
+# Plotting results
 
 plot(avg_steps_interval$Group.1,avg_steps_interval$x, type = "l")
+plot(selec_interval$Group.1,selec_interval$x, type = "l")
+abline(v=max_interval, col="blue", lwd=2)
+
+# -------------------- Fim da Questão 2
 
 
-avg_steps_interval$Group.1[which.max(avg_steps_interval$x)]
-avg_steps_interval$x[which.max(avg_steps_interval$x)]
 
 #Calculando a quantidade de NA
 

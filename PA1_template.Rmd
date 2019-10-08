@@ -73,9 +73,50 @@ text(total_median_steps_day+350,9,"Median", col="blue", adj=c(0,0.5))
 
 
 
-
 ## What is the average daily activity pattern?
 
+The activity dataset has  information gathered in intervals of 5 minutes that can be used to profile de activity pattern, the code to arrage the data follow:
+
+```{r agregate_interval_data}
+
+# Agregating data acording 5 minutes interval
+avg_steps_interval <- aggregate(act_no_NA$steps, list(factor(act_no_NA$interval)), median)
+avg_steps_interval <- remove.factors(avg_steps_interval)  # Factor removed to plot data
+
+
+# Search interval with high mean value
+
+max_interval <- avg_steps_interval$Group.1[which.max(avg_steps_interval$x)]
+max_mean_estep <- avg_steps_interval$x[which.max(avg_steps_interval$x)]
+print(paste("The maximun mean step value occurs at interval: ", max_interval,
+           "at value of:", max_mean_estep))
+
+# Subseting neighbour maximum value data
+
+interval_x <- as.character(seq(as.numeric(max_interval)-100,as.numeric(max_interval)+100,5))
+selec_interval <- filter(avg_steps_interval,Group.1 %in% interval_x)
+
+```
+
+The results mean of number steps acording to the interval can be observed in the graphics that follow.
+
+```{r graphics_steps_interval}
+
+# Plotting results for entire intervals
+plot(avg_steps_interval$Group.1,avg_steps_interval$x, type = "l", xlab="Five minute interval", ylab = "Mean of steps", main = "Daily activity")
+
+```
+
+A zoom at the interest point.
+
+```{r graphic_steps_zoom}
+
+# A zoom at the nighbour of maximum point
+
+plot(selec_interval$Group.1,selec_interval$x, type = "l", xlab="Five minute interval", ylab = "Mean of steps", main = "Zoom at daily activity")
+abline(v=max_interval, col="blue", lwd=2)
+text(as.character(as.numeric(max_interval)+5),50,"Max steps", col="blue", adj=c(0,0.5))
+```
 
 
 ## Imputing missing values
