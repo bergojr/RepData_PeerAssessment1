@@ -12,12 +12,12 @@ library(dplyr)
 library(ggplot2)
 library(gridExtra)
 library(taRifx)
+library(lattice)
 
 unzip("activity.zip")
 activity <-  read.csv("activity.csv", sep = ",") %>%
   transform(steps <- as.numeric(steps)) %>%
   remove.factors()
-
 activity$date <- as.Date(activity$date, "%Y-%m-%d")
   
 complete_activity <- complete.cases(activity)
@@ -26,8 +26,13 @@ act_no_NA <- activity[complete_activity,]
 sum_steps_day <- aggregate(act_no_NA$steps, list(act_no_NA$date), sum)
 mean_steps_day <- aggregate(act_no_NA$steps, list(act_no_NA$date), mean)
 median_steps_day <- aggregate(act_no_NA$steps, list(act_no_NA$date), median)
+total_mean_steps_day <-  mean(sum_steps_day$x)
+total_median_steps_day <- median(sum_steps_day$x)
 
-hist(sum_steps_day$x, breaks = 20, xlab = "Number of Steps per Day")
+hist(sum_steps_day$x, breaks = 20, xlab = "Number of Steps per Day", 
+     main = "Histogram for number of steps a day")
+abline(v=total_median_steps_day,col="blue")
+text(total_median_steps_day+350,9,"Median", col="blue", adj=c(0,0.5))
 
 avg_steps_interval <- aggregate(act_no_NA$steps, list(factor(act_no_NA$interval)), median)
 avg_steps_interval <- remove.factors(avg_steps_interval)
@@ -62,12 +67,20 @@ sum_steps_day_filled <- aggregate(filled_activity$steps, list(filled_activity$da
 hist(sum_steps_day_filled$x, breaks = 20, xlab = "Number of Steps per Day")
 
 filled_activity$weekday <- weekdays(filled_activity$date, abbreviate = TRUE)
-filled_activity$weekend <- factor(filled_activity$weekday, levels = teste2, labels=c(rep("non-weekend",5),rep("weekend",2)))
+filled_activity$weekend <- factor(filled_activity$weekday
+                                  , levels = unique(filled_activity$weekday)
+                                  , labels=c(rep("weekdays",5),rep("weekend",2)))
 filled_activity_weekend <- split(filled_activity, filled_activity$weekend)
 
-filled_activity_weekend <- filled_activity %>%
+avg_filled_activity_weekend <- filled_activity %>%
                           select(interval,weekend,steps) %>%
                           group_by(interval, weekend) %>% 
-                          summarise_each(funs(mean))
+                          summarise(steps = mean(steps))
 
-# avg_filled_activity_weekend <- aggregate(filled_activity_weekend$weekend$steps, list(filled_activity_weekend$weekend$interval), mean)
+with(avg_filled_activity_weekend, xyplot(steps~interval | weekend, 
+                                         type = "l", 
+                                         layout = c(1,2),
+                                         xlab = "Interval",
+                                         ylab = "Average steps"))
+
+#avg_filled_activity_weekend2 <- aggregate(filled_activity_weekend$weekend$steps, list(filled_activity_weekend$weekend$interval), mean)

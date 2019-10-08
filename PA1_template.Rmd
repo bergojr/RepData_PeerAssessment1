@@ -6,11 +6,71 @@ output:
 ---
 
 
-## Loading and preprocessing the data
+## Loading and preprocessing the data  
 
+The packages required to run and reproduce the code are listed.  
 
+1. dplyr
+2. ggplot2
+3. gridExtra
+4. taRifx
+5. lattice
+
+```{r library, echo=FALSE, message=FALSE}
+
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+library(taRifx)
+library(lattice)
+```
+
+This code supose that file "activity.zip" is available at working directory.  
+
+```{r load_prepare_data}
+
+unzip("activity.zip")
+activity <-  read.csv("activity.csv", sep = ",") %>%
+  transform(steps <- as.numeric(steps)) %>%
+  remove.factors() #Factors where removed to avoid be plotted on graphics
+activity$date <- as.Date(activity$date, "%Y-%m-%d")
+
+```
 
 ## What is mean total number of steps taken per day?
+
+For this part of task it is used only the complete cases of data set.  
+
+```{r daily_activity_complete_cases}
+
+complete_activity <- complete.cases(activity)
+act_no_NA <- activity[complete_activity,]
+
+# Using aggregate funcion grouping data by day and calculating sum, mean and median
+
+sum_steps_day <- aggregate(act_no_NA$steps, list(act_no_NA$date), sum)
+mean_steps_day <- aggregate(act_no_NA$steps, list(act_no_NA$date), mean)
+median_steps_day <- aggregate(act_no_NA$steps, list(act_no_NA$date), median) #The value is 0 for each day
+```
+
+The mean and median for the total of steps per day are respectively:
+
+```{r mean_med}
+total_mean_steps_day <-  mean(sum_steps_day$x)
+total_median_steps_day <- median(sum_steps_day$x)
+print(paste("Mean of total of steps a day :", total_mean_steps_day))
+print(paste("Median of total of steps a day :", total_median_steps_day))
+```
+
+Considering this values are so close, only the median value is shown in the histogram.
+
+```{r histogram}
+hist(sum_steps_day$x, breaks = 20, xlab = "Number of Steps per Day", 
+     main = "Histogram for number of steps a day")
+abline(v=total_median_steps_day,col="blue")
+text(total_median_steps_day+350,9,"Median", col="blue", adj=c(0,0.5))
+```
+
 
 
 
